@@ -84,13 +84,15 @@ func (v *Value) Cubic(x, y float64) float64 {
 
 	x1 := int(xi)
 	if xi < 0 || xr < 0 {
-		x1 = ^x1
+		x1 = x1 - 1
+		xr = 1 + xr
 	}
 	x1 = x1 & intMask
 
 	y1 := int(yi)
 	if yi < 0 || yr < 0 {
-		y1 = ^y1
+		y1 = y1 - 1
+		yr = 1 + yr
 	}
 	y1 = y1 & intMask
 	y1 = y1 << shift

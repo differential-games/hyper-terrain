@@ -11,6 +11,7 @@ func randP() (float64, float64) {
 }
 
 func Benchmark_RandP(b *testing.B) {
+	// Benchmark computing random points for tests.
 	for i := 0; i < b.N; i++ {
 		randP()
 	}

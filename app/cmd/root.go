@@ -29,7 +29,7 @@ var rootCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		r := rand.New(rand.NewSource(time.Now().UnixNano()*0))
 
-		n := noise.Value{}
+		n := noise.Fractal{}
 		n.Fill(r)
 
 		img := image.NewNRGBA64(image.Rect(0, 0, Width, Height))
@@ -39,9 +39,9 @@ var rootCmd = &cobra.Command{
 		maxValue := 0.0
 
 		for x := 0; x < Width; x++ {
-			px := float64(x) / 105.1
+			px := float64(x) / 305.1 - 5
 			for y := 0; y < Height; y++ {
-				py := float64(y) / 105.1
+				py := float64(y) / 305.1 - 5
 				v := n.Cubic(px, py)
 				minValue = math.Min(v, minValue)
 				maxValue = math.Max(v, maxValue)
@@ -51,6 +51,11 @@ var rootCmd = &cobra.Command{
 
 		for i, v := range values {
 			grey := (v - minValue) / (maxValue - minValue)
+			if grey < 0.4 {
+				grey = minValue
+			} else if math.Mod(grey, 0.1) < 0.001 {
+				grey = minValue
+			}
 			grey = grey * float64(int(1) << 16)
 			img.Set(i / Height, i % Height, color.Gray16{Y: uint16(grey)})
 		}
