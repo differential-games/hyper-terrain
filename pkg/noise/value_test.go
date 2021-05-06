@@ -12,7 +12,7 @@ import (
 var n = Value{}
 
 func init() {
-	n.Fill(rand.NewSource(time.Now().UnixNano()))
+	n.Fill(rand.New(rand.NewSource(time.Now().UnixNano())))
 }
 
 type pos struct {
@@ -114,12 +114,12 @@ func TestValue_V_Monotonic(t *testing.T) {
 			if v1 < v3 {
 				if v1 > v2 || v2 > v3 {
 					t.Fatalf("behavior nonmonotonic from (%v:%f) to (%v:%f) to (%v:%f)",
-						tc.p1, v1.F16().Float64(), tc.p2, v2.F16().Float64(), tc.p3, v3.F16().Float64())
+						tc.p1, v1, tc.p2, v2, tc.p3, v3)
 				}
 			} else {
 				if v1 < v2 || v2 < v3 {
 					t.Fatalf("behavior nonmonotonic from (%v:%f) to (%v:%f) to (%v:%f)",
-						tc.p1, v1.F16().Float64(), tc.p2, v2.F16().Float64(), tc.p3, v3.F16().Float64())
+						tc.p1, v1, tc.p2, v2, tc.p3, v3)
 				}
 			}
 		})
@@ -171,7 +171,7 @@ func TestValue_V_Modulus(t *testing.T) {
 
 			if v1 != v2 {
 				t.Fatalf("expected equivalent values (%v:%f) and (%v:%f)",
-					tc.p1, v1.F16().Float64(), tc.p2, v2.F16().Float64())
+					tc.p1, v1, tc.p2, v2)
 			}
 		})
 	}

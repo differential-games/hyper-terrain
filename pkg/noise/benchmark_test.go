@@ -32,11 +32,11 @@ func BenchmarkValue_Cubic(b *testing.B) {
 
 var (
 	n2  = Value{}
-	src = rand.NewSource(time.Now().UnixNano())
+	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 )
 
 func BenchmarkValue_Fill(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		n2.Fill(src)
+		n2.Fill(rnd)
 	}
 }

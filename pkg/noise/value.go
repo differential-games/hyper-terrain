@@ -11,20 +11,20 @@ type Value struct {
 	// noise is an array of the underlying noise.
 	// Row (x) is the [0,size) bits of the index.
 	// Column (y) is the [size,2*size) bits of the index.
-	noise [size2]fixed.F16
+	noise [size2]float64
 }
 
 // Fill generates the underlying noise which Value will interpolate.
 //
 // src is the source of randomness to use to generate noise.
-func (v *Value) Fill(src rand.Source) {
+func (v *Value) Fill(rnd *rand.Rand) {
 	for i := 0; i < size2; i++ {
-		v.noise[i] = fixed.F16(src.Int63()).Remainder() // 0.0 to 1.0 - 2^-16
+		v.noise[i] = rnd.Float64()
 	}
 }
 
 // Nearest returns the noise nearest to (x, y).
-func (v *Value) Nearest(x, y fixed.F16) fixed.F16 {
+func (v *Value) Nearest(x, y fixed.F16) float64 {
 	// Take the modulus of the integral parts of each coordinate.
 	// Each measured faster stored rather than recomputed 4 times.
 	xi := x.Int() & intMask
@@ -41,11 +41,11 @@ func (v *Value) Nearest(x, y fixed.F16) fixed.F16 {
 	return v.noise[yi+xi]
 }
 
-// Linear linearly interpolates noise.
+// Linear returns the bilinear-interpolated value noise at the specified coordinates.
 //
 // Guarantees monotonic behavior between integral values.
 // Guarantees behavior at (x, y) is equivalent to (x mod size, y mod size)
-func (v *Value) Linear(x, y fixed.F16) fixed.F32 {
+func (v *Value) Linear(x, y fixed.F16) float64 {
 	// Take the modulus of the integral parts of each coordinate.
 	// Measured faster to store rather than recompute 4 times.
 	xi := x.Int() & intMask
@@ -64,23 +64,26 @@ func (v *Value) Linear(x, y fixed.F16) fixed.F32 {
 	// Linearly interpolate based on the four corners of the enclosing square.
 
 	// Measured faster to store these rather than recompute.
-	xr := x.Remainder()
-	yr := y.Remainder()
+	xr := x.Remainder().Float64()
+	yr := y.Remainder().Float64()
 	// Measured faster to store xryr as to
 	// 1) try to eliminate the second use, or
 	// 2) not store the value.
-	xryr := xr.Times(yr).F16()
-	return xryr.Times(vUpperRight) +
-		(yr - xryr).Times(vUpperLeft) +
-		(xr - xryr).Times(vBottomRight) +
-		(fixed.One16 + xryr - xr - yr).Times(vBottomLeft)
+	xryr := xr * yr
+	return xryr * vUpperRight +
+		(yr - xryr) * vUpperLeft +
+		(xr - xryr) * vBottomRight +
+		(1.0 + xryr - xr - yr) * vBottomLeft
 }
 
+// LinearFloat is a convenience method for getting the bilinear-interpolated value noise at a pair
+// of float64 coordinates.
 func (v *Value) LinearFloat(x, y float64) float64 {
 	xf, yf := fixed.Float(x), fixed.Float(y)
-	return v.Linear(xf, yf).Float64()
+	return v.Linear(xf, yf)
 }
 
+// Cubic returns the bicubic-interpolated value noise at the specified coordinates.
 func (v *Value) Cubic(x, y fixed.F16) float64 {
 	// This consistently beats a Value noise generator which only uses floats as getting the
 	// corresponding indices ends up costing several extra nanoseconds per call.
@@ -102,22 +105,22 @@ func (v *Value) Cubic(x, y fixed.F16) float64 {
 	y3 := (y2 + size) & int2Mask
 
 	// Get the random noise in a 4x4 grid centered on (x, y).
-	f00 := v.noise[x0+y0].Float64()
-	f01 := v.noise[x0+y1].Float64()
-	f02 := v.noise[x0+y2].Float64()
-	f03 := v.noise[x0+y3].Float64()
-	f10 := v.noise[x1+y0].Float64()
-	f11 := v.noise[x1+y1].Float64()
-	f12 := v.noise[x1+y2].Float64()
-	f13 := v.noise[x1+y3].Float64()
-	f20 := v.noise[x2+y0].Float64()
-	f21 := v.noise[x2+y1].Float64()
-	f22 := v.noise[x2+y2].Float64()
-	f23 := v.noise[x2+y3].Float64()
-	f30 := v.noise[x3+y0].Float64()
-	f31 := v.noise[x3+y1].Float64()
-	f32 := v.noise[x3+y2].Float64()
-	f33 := v.noise[x3+y3].Float64()
+	f00 := v.noise[x0+y0]
+	f01 := v.noise[x0+y1]
+	f02 := v.noise[x0+y2]
+	f03 := v.noise[x0+y3]
+	f10 := v.noise[x1+y0]
+	f11 := v.noise[x1+y1]
+	f12 := v.noise[x1+y2]
+	f13 := v.noise[x1+y3]
+	f20 := v.noise[x2+y0]
+	f21 := v.noise[x2+y1]
+	f22 := v.noise[x2+y2]
+	f23 := v.noise[x2+y3]
+	f30 := v.noise[x3+y0]
+	f31 := v.noise[x3+y1]
+	f32 := v.noise[x3+y2]
+	f33 := v.noise[x3+y3]
 
 	// Calculate the y partial derivatives over the grid.
 	fy01 := (f02 - f00) / 2
@@ -158,6 +161,8 @@ func (v *Value) Cubic(x, y fixed.F16) float64 {
 	})
 }
 
+// CubicFloat is a convenience method for getting the bicubic-interpolated value noise at a pair of
+// float64 coordinates.
 func (v *Value) CubicFloat(x, y float64) float64 {
 	xf, yf := fixed.Float(x), fixed.Float(y)
 	return v.Cubic(xf, yf)
