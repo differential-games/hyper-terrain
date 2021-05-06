@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-func randP() pos {
-	return p(rand.Float64()*float64(size), rand.Float64()*float64(size))
+func randP() (float64, float64) {
+	return rnd.Float64()*float64(size), rnd.Float64()*float64(size)
 }
 
 func Benchmark_RandP(b *testing.B) {
@@ -18,15 +18,13 @@ func Benchmark_RandP(b *testing.B) {
 
 func BenchmarkValue_Linear(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		pt := randP()
-		n.Linear(pt.x, pt.y)
+		n.Linear(randP())
 	}
 }
 
 func BenchmarkValue_Cubic(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		pt := randP()
-		n.Cubic(pt.x, pt.y)
+		n.Cubic(randP())
 	}
 }
 

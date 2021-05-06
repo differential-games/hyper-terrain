@@ -27,7 +27,7 @@ var rootCmd = &cobra.Command{
                 love by spf13 and friends in Go.
                 Complete documentation is available at http://hugo.spf13.com`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()))
+		r := rand.New(rand.NewSource(time.Now().UnixNano()*0))
 
 		n := noise.Value{}
 		n.Fill(r)
@@ -42,7 +42,7 @@ var rootCmd = &cobra.Command{
 			px := float64(x) / 105.1
 			for y := 0; y < Height; y++ {
 				py := float64(y) / 105.1
-				v := n.CubicFloat(px, py)
+				v := n.Cubic(px, py)
 				minValue = math.Min(v, minValue)
 				maxValue = math.Max(v, maxValue)
 				values[x*Height+y] = v

@@ -5,8 +5,6 @@ import (
 	"math/rand"
 	"testing"
 	"time"
-
-	"willbeason/hyper-terrain/pkg/fixed"
 )
 
 var n = Value{}
@@ -16,16 +14,16 @@ func init() {
 }
 
 type pos struct {
-	x fixed.F16
-	y fixed.F16
+	x float64
+	y float64
 }
 
 func (p pos) String() string {
-	return fmt.Sprintf("(%.2f,%.2f)", p.x.Float64(), p.y.Float64())
+	return fmt.Sprintf("(%.2f,%.2f)", p.x, p.y)
 }
 
 func p(x, y float64) pos {
-	return pos{x: fixed.Float(x), y: fixed.Float(y)}
+	return pos{x: x, y: y}
 }
 
 func TestValue_V(t *testing.T) {
@@ -43,7 +41,7 @@ func TestValue_V(t *testing.T) {
 		},
 		{
 			name: "works at noise boundary",
-			p:    pos{x: fixed.Int(size), y: fixed.Int(size)},
+			p:    pos{x: float64(size), y: float64(size)},
 		},
 	}
 
@@ -87,21 +85,21 @@ func TestValue_V_Monotonic(t *testing.T) {
 		},
 		{
 			name: "monotonic (0, SIZE-1) to (0, SIZE)",
-			p1:   pos{x: fixed.Int(0), y: fixed.Int(size - 1)},
-			p2:   pos{x: fixed.Int(0), y: fixed.Int(size-1) + fixed.Float(rand.Float64())},
-			p3:   pos{x: fixed.Int(0), y: fixed.Int(size)},
+			p1:   pos{x: 0, y: float64(size - 1)},
+			p2:   pos{x: 0, y: float64(size-1) + rand.Float64()},
+			p3:   pos{x: 0, y: float64(size)},
 		},
 		{
 			name: "monotonic (0, SIZE) to (0, SIZE+1)",
-			p1:   pos{x: fixed.Int(0), y: fixed.Int(size)},
-			p2:   pos{x: fixed.Int(0), y: fixed.Int(size) + fixed.Float(rand.Float64())},
-			p3:   pos{x: fixed.Int(0), y: fixed.Int(size + 1)},
+			p1:   pos{x: (0), y: float64(size)},
+			p2:   pos{x: (0), y: float64(size) + rand.Float64()},
+			p3:   pos{x: (0), y: float64(size + 1)},
 		},
 		{
 			name: "monotonic (SIZE, 0) to (SIZE+1, 0)",
-			p1:   pos{x: fixed.Int(size), y: 0},
-			p2:   pos{x: fixed.Int(size) + fixed.Float(rand.Float64()), y: 0},
-			p3:   pos{x: fixed.Int(size + 1), y: 0},
+			p1:   pos{x: float64(size), y: 0},
+			p2:   pos{x: float64(size) + rand.Float64(), y: 0},
+			p3:   pos{x: float64(size + 1), y: 0},
 		},
 	}
 
@@ -135,32 +133,32 @@ func TestValue_V_Modulus(t *testing.T) {
 		{
 			name: "equivalent (0, 0) and (0, SIZE)",
 			p1:   pos{x: 0, y: 0},
-			p2:   pos{x: 0, y: fixed.Int(size)},
+			p2:   pos{x: 0, y: float64(size)},
 		},
 		{
 			name: "equivalent (0, 0) and (SIZE, 0)",
 			p1:   pos{x: 0, y: 0},
-			p2:   pos{x: fixed.Int(size), y: 0},
+			p2:   pos{x: float64(size), y: 0},
 		},
 		{
 			name: "equivalent (0, 0) and (SIZE, SIZE)",
 			p1:   pos{x: 0, y: 0},
-			p2:   pos{x: fixed.Int(size), y: fixed.Int(size)},
+			p2:   pos{x: float64(size), y: float64(size)},
 		},
 		{
 			name: "equivalent (1, 1) and (1, SIZE+1)",
 			p1:   pos{x: 0, y: 0},
-			p2:   pos{x: 0, y: fixed.Int(size)},
+			p2:   pos{x: 0, y: float64(size)},
 		},
 		{
 			name: "equivalent (1, 1) and (SIZE+1, 1)",
 			p1:   pos{x: 0, y: 0},
-			p2:   pos{x: fixed.Int(size), y: 0},
+			p2:   pos{x: float64(size), y: 0},
 		},
 		{
 			name: "equivalent (1, 1) and (SIZE+1, SIZE+1)",
 			p1:   pos{x: 0, y: 0},
-			p2:   pos{x: fixed.Int(size), y: fixed.Int(size)},
+			p2:   pos{x: float64(size), y: float64(size)},
 		},
 	}
 
