@@ -25,8 +25,22 @@ type Fractal struct {
 func (f *Fractal) Cubic(x, y float64) float64 {
 	sum := 0.0
 	c := 1.0
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 15; i++ {
 		sum += f.Value.Cubic(x, y) * c
+		x, y = x*cosAngle-y*sinAngle, x*sinAngle+y*cosAngle
+		x, y = x+offsetX, y+offsetY
+		x *= scale
+		y *= scale
+		c *= invScale
+	}
+	return sum
+}
+
+func (f *Fractal) Linear(x, y float64) float64 {
+	sum := 0.0
+	c := 1.0
+	for i := 0; i < 15; i++ {
+		sum += f.Value.Linear(x, y) * c
 		x, y = x*cosAngle-y*sinAngle, x*sinAngle+y*cosAngle
 		x, y = x+offsetX, y+offsetY
 		x *= scale

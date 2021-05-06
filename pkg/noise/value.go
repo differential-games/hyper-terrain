@@ -13,6 +13,9 @@ type Value struct {
 	// Row (x) is the [0,size) bits of the index.
 	// Column (y) is the [size,2*size) bits of the index.
 	noise [size2]float64
+
+	// Surprisingly, it is slower to precompute partial derivatives to reference
+	// later than to just compute them on-the-fly.
 }
 
 // Fill generates the underlying noise which Value will interpolate.
@@ -35,13 +38,15 @@ func (v *Value) Linear(x, y float64) float64 {
 
 	x1 := int(xi)
 	if xi < 0 || xr < 0 {
-		x1 = ^x1
+		x1 = x1 - 1
+		xr = 1 + xr
 	}
 	x1 = x1 & intMask
 
 	y1 := int(yi)
 	if yi < 0 || yr < 0 {
-		y1 = ^y1
+		y1 = y1 - 1
+		yr = 1 + yr
 	}
 	y1 = y1 & intMask
 	y1 = y1 << shift
