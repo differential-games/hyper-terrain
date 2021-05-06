@@ -81,53 +81,27 @@ func (v *Value) LinearFloat(x, y float64) float64 {
 	return v.Linear(xf, yf).Float64()
 }
 
-var M1 = fixed.Matrix{
-	1, 0, 0, 0,
-	0, 0, 1, 0,
-	-3, 3, -2, -1,
-	2, -2, 1, 1,
-}
-
-var M2 = fixed.Matrix{
-	1, 0, -3, 2,
-	0, 0, 3, -2,
-	0, 1, -2, 1,
-	0, 0, -1, 1,
-}
-
 func (v *Value) Cubic(x, y fixed.F16) float64 {
+	// This consistently beats a Value noise generator which only uses floats as getting the
+	// corresponding indices ends up costing several extra nanoseconds per call.
+
 	// (x1, y1) is the bottom left of the cell containing (x, y).
 	x1 := x.Int() & intMask
 	y1 := int(y>>revShift) & int2Mask
 
-	x0 := intMask
-	if x1 != 0 {
-		x0 = x1 - 1
-	}
-	y0 := int2Mask
-	if y1 != 0 {
-		y0 = y1 - size
-	}
+	// (x0, y0) is the bottom left of the cell south-west of the cell containing (x, y).
+	x0 := (x1 - 1) & intMask
+	y0 := (y1 - size) & int2Mask
 
 	// (x2, y2) is the top right of the cell containing (x, y).
-	x2 := 0
-	if x1 != intMask {
-		x2 = x1 + 1
-	}
-	y2 := 0
-	if y1 != int2Mask {
-		y2 = y1 + size
-	}
+	x2 := (x1 + 1) & intMask
+	y2 := (y1 + size) & int2Mask
 
-	x3 := 0
-	if x2 != intMask {
-		x3 = x2 + 1
-	}
-	y3 := 0
-	if y2 != int2Mask {
-		y3 = y2 + size
-	}
+	// (x3, y3) is the top right of the cell north-east of the cell containing (x, y).
+	x3 := (x2 + 1) & intMask
+	y3 := (y2 + size) & int2Mask
 
+	// Get the random noise in a 4x4 grid centered on (x, y).
 	f00 := v.noise[x0+y0].Float64()
 	f01 := v.noise[x0+y1].Float64()
 	f02 := v.noise[x0+y2].Float64()
@@ -145,6 +119,7 @@ func (v *Value) Cubic(x, y fixed.F16) float64 {
 	f32 := v.noise[x3+y2].Float64()
 	f33 := v.noise[x3+y3].Float64()
 
+	// Calculate the y partial derivatives over the grid.
 	fy01 := (f02 - f00) / 2
 	fy02 := (f03 - f01) / 2
 	fy11 := (f12 - f10) / 2
@@ -154,29 +129,32 @@ func (v *Value) Cubic(x, y fixed.F16) float64 {
 	fy31 := (f32 - f30) / 2
 	fy32 := (f33 - f31) / 2
 
+	// Even though these are single-use, the compiler automatically optimizes away these assignments.
+	// They're split out for readability.
+	//
+	// Calculate the x partial derivatives over the grid.
 	fx11 := (f21 - f01) / 2
 	fx12 := (f22 - f02) / 2
 	fx21 := (f31 - f11) / 2
 	fx22 := (f32 - f12) / 2
-
+	// Calculate the mixed xy partial derivatives over the grid.
 	fxy11 := (fy21 - fy01) / 2
 	fxy12 := (fy22 - fy02) / 2
 	fxy21 := (fy31 - fy11) / 2
 	fxy22 := (fy32 - fy12) / 2
 
-	xf := x.Remainder().Float64()
-	xxf := xf*xf
-	yf := y.Remainder().Float64()
-	yyf := yf*yf
+	// It is slower to precompute squares.
+	xr := x.Remainder().Float64()
+	yr := y.Remainder().Float64()
 	return fixed.V4{
-		1, xf, xxf, xxf*xf,
-	}.TimesMatrix(M1).TimesMatrix(fixed.Matrix{
+		1, xr, xr * xr, xr * xr * xr,
+	}.TimesM1().TimesMatrix(fixed.Matrix{
 		f11, f12, fy11, fy12,
 		f21, f22, fy21, fy22,
 		fx11, fx12, fxy11, fxy12,
 		fx21, fx22, fxy21, fxy22,
-	}).TimesMatrix(M2).Dot(fixed.V4{
-		1, yf, yyf, yyf*yf,
+	}).TimesM2().Dot(fixed.V4{
+		1, yr, yr * yr, yr * yr * yr,
 	})
 }
 

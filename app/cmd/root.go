@@ -27,7 +27,7 @@ var rootCmd = &cobra.Command{
                 love by spf13 and friends in Go.
                 Complete documentation is available at http://hugo.spf13.com`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()*0))
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 		n := noise.Value{}
 		n.Fill(r)

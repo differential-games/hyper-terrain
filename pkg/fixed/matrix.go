@@ -51,3 +51,25 @@ func (v V4) TimesMatrix(m Matrix) V4 {
 func (v V4) Dot(b V4) float64 {
 	return v[0]*b[0] + v[1]*b[1] + v[2]*b[2] + v[3]*b[3]
 }
+
+// TimesM1 multiplies by the value matrix.
+// See https://en.wikipedia.org/wiki/Bicubic_interpolation.
+func (v V4) TimesM1() V4 {
+	return V4{
+		v[0]-3*v[2]+2*v[3],
+		3*v[2]-2*v[3],
+		v[1]-2*v[2]+v[3],
+		-v[2]+v[3],
+	}
+}
+
+// TimesM2 multiplies by the inverse of the value matrix.
+// See https://en.wikipedia.org/wiki/Bicubic_interpolation.
+func (v V4) TimesM2() V4 {
+	return V4{
+		v[0],
+		v[2],
+		-3*v[0]+3*v[1]-2*v[2]-v[3],
+		2*v[0]-2*v[1]+v[2]+v[3],
+	}
+}
