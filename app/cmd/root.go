@@ -16,18 +16,26 @@ import (
 )
 
 const (
-	Width = 2560
+	Width  = 2560
 	Height = 1440
 )
 
+const (
+	MaxGrey          = 1 << 16
+	Contour          = 0.1
+	ContourThreshold = 0.001
+
+	InvLargestScale = 1 / 305.1
+	Offset          = -5
+
+	WaterThreshold = 0.4
+)
+
 var rootCmd = &cobra.Command{
-	Use:   "hugo",
-	Short: "Hugo is a very fast static site generator",
-	Long: `A Fast and Flexible Static Site Generator built with
-                love by spf13 and friends in Go.
-                Complete documentation is available at http://hugo.spf13.com`,
+	Use:   "hyper-terrain",
+	Short: "hyper-terrain is a fast random terrain generator",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		r := rand.New(rand.NewSource(time.Now().UnixNano()*0))
+		r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 		n := noise.Fractal{}
 		n.Fill(r)
@@ -39,9 +47,9 @@ var rootCmd = &cobra.Command{
 		maxValue := 0.0
 
 		for x := 0; x < Width; x++ {
-			px := float64(x) / 105.1 - 5
+			px := float64(x)*InvLargestScale + Offset
 			for y := 0; y < Height; y++ {
-				py := float64(y) / 105.1 - 5
+				py := float64(y)*InvLargestScale + Offset
 				v := n.Cubic(px, py)
 				minValue = math.Min(v, minValue)
 				maxValue = math.Max(v, maxValue)
@@ -51,20 +59,24 @@ var rootCmd = &cobra.Command{
 
 		for i, v := range values {
 			grey := (v - minValue) / (maxValue - minValue)
-			if grey < 0.40 {
+			if grey < WaterThreshold {
 				grey = minValue
-			} else if math.Mod(grey, 0.1) < 0.001 {
+			} else if math.Mod(grey, Contour) < ContourThreshold {
 				grey = minValue
 			}
-			grey = grey * float64(int(1) << 16)
-			img.Set(i / Height, i % Height, color.Gray16{Y: uint16(grey)})
+			grey = grey * float64(MaxGrey)
+			img.Set(i/Height, i%Height, color.Gray16{Y: uint16(grey)})
 		}
 
 		out, err := os.Create("out.png")
 		if err != nil {
 			return err
 		}
-		defer out.Close()
+		defer func() {
+			if closeErr := out.Close(); closeErr != nil {
+				fmt.Fprintln(os.Stderr, closeErr)
+			}
+		}()
 
 		err = png.Encode(out, img)
 		if err != nil {

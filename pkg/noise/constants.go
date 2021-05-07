@@ -14,10 +14,6 @@ const (
 	// but the gains in randomness are unlikely to be noticeable by humans.
 	shift uint8 = 9
 
-	// revShift is a compile-time constant representing the number of bits to shift y from to
-	// get it into the correct index position.
-	revShift = 16 - shift
-
 	// size is the scale of noise in units (for single-layer noise) before indices repeat.
 	// We have it as a compile-time constant so types can use this as array length factors.
 	size int = 1 << shift

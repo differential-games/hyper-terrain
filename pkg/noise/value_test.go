@@ -7,12 +7,6 @@ import (
 	"time"
 )
 
-var n = Value{}
-
-func init() {
-	n.Fill(rand.New(rand.NewSource(time.Now().UnixNano())))
-}
-
 type pos struct {
 	x float64
 	y float64
@@ -27,6 +21,9 @@ func p(x, y float64) pos {
 }
 
 func TestValue_V(t *testing.T) {
+	n := Value{}
+	n.Fill(rand.New(rand.NewSource(time.Now().UnixNano())))
+
 	tcs := []struct {
 		name string
 		p    pos
@@ -53,6 +50,9 @@ func TestValue_V(t *testing.T) {
 }
 
 func TestValue_V_Monotonic(t *testing.T) {
+	n := Value{}
+	n.Fill(rand.New(rand.NewSource(time.Now().UnixNano())))
+
 	tcs := []struct {
 		name string
 		p1   pos
@@ -125,6 +125,9 @@ func TestValue_V_Monotonic(t *testing.T) {
 }
 
 func TestValue_V_Modulus(t *testing.T) {
+	n := Value{}
+	n.Fill(rand.New(rand.NewSource(time.Now().UnixNano())))
+
 	tcs := []struct {
 		name string
 		p1   pos

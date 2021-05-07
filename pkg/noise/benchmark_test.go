@@ -7,7 +7,7 @@ import (
 )
 
 func randP() (float64, float64) {
-	return rnd.Float64()*float64(size), rnd.Float64()*float64(size)
+	return rnd.Float64() * float64(size), rnd.Float64() * float64(size)
 }
 
 func Benchmark_RandP(b *testing.B) {
@@ -18,12 +18,20 @@ func Benchmark_RandP(b *testing.B) {
 }
 
 func BenchmarkValue_Linear(b *testing.B) {
+	n := Value{}
+	n.Fill(rand.New(rand.NewSource(time.Now().UnixNano())))
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		n.Linear(randP())
 	}
 }
 
 func BenchmarkValue_Cubic(b *testing.B) {
+	n := Value{}
+	n.Fill(rand.New(rand.NewSource(time.Now().UnixNano())))
+	b.ResetTimer()
+
 	for i := 0; i < b.N; i++ {
 		n.Cubic(randP())
 	}

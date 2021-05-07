@@ -30,7 +30,7 @@ func (v *Value) Fill(rnd *rand.Rand) {
 // Linear returns the bilinear-interpolated value noise at the specified coordinates.
 //
 // Guarantees monotonic behavior between integral values.
-// Guarantees behavior at (x, y) is equivalent to (x mod size, y mod size)
+// Guarantees behavior at (x, y) is equivalent to (x mod size, y mod size).
 func (v *Value) Linear(x, y float64) float64 {
 	// (x1, y1) is the bottom left of the cell containing (x, y).
 	xi, xr := math.Modf(x)
@@ -38,18 +38,18 @@ func (v *Value) Linear(x, y float64) float64 {
 
 	x1 := int(xi)
 	if xi < 0 || xr < 0 {
-		x1 = x1 - 1
-		xr = 1 + xr
+		x1--
+		xr++
 	}
-	x1 = x1 & intMask
+	x1 &= intMask
 
 	y1 := int(yi)
 	if yi < 0 || yr < 0 {
-		y1 = y1 - 1
-		yr = 1 + yr
+		y1--
+		yr++
 	}
-	y1 = y1 & intMask
-	y1 = y1 << shift
+	y1 &= intMask
+	y1 <<= shift
 
 	// Get the value at each corner surrounding the position.
 	// The compiler optimizes away these assignments; this is for readability.
@@ -66,41 +66,34 @@ func (v *Value) Linear(x, y float64) float64 {
 	// 1) try to eliminate the second use, or
 	// 2) not store the value.
 	xryr := xr * yr
-	return xryr * vUpperRight +
-		(yr - xryr) * vUpperLeft +
-		(xr - xryr) * vBottomRight +
-		(1.0 + xryr - xr - yr) * vBottomLeft
-}
-
-// LinearFloat is a convenience method for getting the bilinear-interpolated value noise at a pair
-// of float64 coordinates.
-func (v *Value) LinearFloat(x, y float64) float64 {
-	return v.Linear(x, y)
+	return xryr*vUpperRight +
+		(yr-xryr)*vUpperLeft +
+		(xr-xryr)*vBottomRight +
+		(1.0+xryr-xr-yr)*vBottomLeft
 }
 
 // Cubic returns the bicubic-interpolated value noise at the specified coordinates.
+//
+// nolint:funlen // There's not a great readable way to get this to under 50 statements that also
+//  maintains performance.
 func (v *Value) Cubic(x, y float64) float64 {
-	// This consistently beats a Value noise generator which only uses floats as getting the
-	// corresponding indices ends up costing several extra nanoseconds per call.
-
 	// (x1, y1) is the bottom left of the cell containing (x, y).
 	xi, xr := math.Modf(x)
 	yi, yr := math.Modf(y)
 
 	x1 := int(xi)
 	if xi < 0 || xr < 0 {
-		x1 = x1 - 1
-		xr = 1 + xr
+		x1--
+		xr++
 	}
-	x1 = x1 & intMask
+	x1 &= intMask
 
 	y1 := int(yi)
 	if yi < 0 || yr < 0 {
-		y1 = y1 - 1
-		yr = 1 + yr
+		y1--
+		yr++
 	}
-	y1 = y1 & intMask
-	y1 = y1 << shift
+	y1 = (y1 & intMask) << shift
 
 	// (x0, y0) is the bottom left of the cell south-west of the cell containing (x, y).
 	x0 := (x1 - 1) & intMask
@@ -156,21 +149,13 @@ func (v *Value) Cubic(x, y float64) float64 {
 	fxy21 := (fy31 - fy11) / 2
 	fxy22 := (fy32 - fy12) / 2
 
-	// It is slower to precompute squares.
-	return fixed.V4{
-		1, xr, xr * xr, xr * xr * xr,
-	}.TimesM1().TimesMatrix(fixed.Matrix{
+	// It is slower to precompute squares of the remainders.
+	return fixed.TimesM1(1, xr, xr*xr, xr*xr*xr).TimesMatrix(
 		f11, f12, fy11, fy12,
 		f21, f22, fy21, fy22,
 		fx11, fx12, fxy11, fxy12,
 		fx21, fx22, fxy21, fxy22,
-	}).TimesM2().Dot(fixed.V4{
-		1, yr, yr * yr, yr * yr * yr,
-	})
-}
-
-// CubicFloat is a convenience method for getting the bicubic-interpolated value noise at a pair of
-// float64 coordinates.
-func (v *Value) CubicFloat(x, y float64) float64 {
-	return v.Cubic(x, y)
+	).TimesM2().Dot(
+		1, yr, yr*yr, yr*yr*yr,
+	)
 }

@@ -79,7 +79,6 @@ linters:
     - funlen
     - gochecknoinits
     - goconst
-    - gocritic
     - gocyclo
     - godot
     - goerr113
@@ -88,7 +87,6 @@ linters:
     - golint
     - gomnd
     - goprintffuncname
-    - gosec
     - gosimple
     - govet
     - ineffassign
@@ -100,7 +98,6 @@ linters:
     - nolintlint
     - prealloc
     - rowserrcheck
-    - staticcheck
     - structcheck
     - stylecheck
     - typecheck
@@ -120,6 +117,9 @@ linters:
   # - testpackage
   # - revive
   # - wsl
+  # - gosec # Not a priority for this repo.
+  # - gocritic # golangci-lint doesn't configure this correctly so we can't disable individual gocritic rules for lines.
+  # - staticcheck # golangci-lint inexplicably drops lint errors, so we need to run it manually.
 
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
