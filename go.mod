@@ -1,4 +1,4 @@
-module github.com/willbeason/hyper-terrail
+module github.com/willbeason/hyper-terrain
 
 go 1.16
 
