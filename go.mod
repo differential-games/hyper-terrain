@@ -1,4 +1,4 @@
-module github.com/willbeason/hyper-terrain
+module github.com/differential-games/hyper-terrain
 
 go 1.16
 

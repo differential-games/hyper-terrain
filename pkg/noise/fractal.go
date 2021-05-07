@@ -1,7 +1,7 @@
 package noise
 
 import (
-	"github.com/willbeason/hyper-terrain/pkg/vector"
+	"github.com/differential-games/hyper-terrain/pkg/vector"
 )
 
 const (

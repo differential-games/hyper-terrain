@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/willbeason/hyper-terrain/pkg/noise"
+	"github.com/differential-games/hyper-terrain/pkg/noise"
 
 	"github.com/spf13/cobra"
 )
