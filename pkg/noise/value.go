@@ -4,7 +4,7 @@ import (
 	"math"
 	"math/rand"
 
-	"willbeason/hyper-terrain/pkg/fixed"
+	"github.com/willbeason/hyper-terrail/pkg/fixed"
 )
 
 // Value implements linearly interpolated value noise.

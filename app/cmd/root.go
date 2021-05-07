@@ -10,7 +10,7 @@ import (
 	"os"
 	"time"
 
-	"willbeason/hyper-terrain/pkg/noise"
+	"github.com/willbeason/hyper-terrail/pkg/noise"
 
 	"github.com/spf13/cobra"
 )

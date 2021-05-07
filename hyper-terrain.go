@@ -1,7 +1,7 @@
 package main
 
 import (
-	"willbeason/hyper-terrain/app/cmd"
+	"github.com/willbeason/hyper-terrail/app/cmd"
 )
 
 // Generate terrain.
