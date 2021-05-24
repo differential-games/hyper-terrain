@@ -40,7 +40,7 @@ linters-settings:
     settings:
       mnd:
         # don't include the "operation" and "assign"
-        checks: argument,case,condition,return
+        checks: [ argument,case,condition,return ]
   govet:
     check-shadowing: true
     settings:
@@ -77,14 +77,16 @@ linters:
     - exportloopref
     - exhaustive
     - funlen
+    - gochecknoglobals
     - gochecknoinits
+    - gocognit
     - goconst
+    - gocritic
     - gocyclo
     - godot
     - goerr113
     - gofmt
     - goimports
-    - golint
     - gomnd
     - goprintffuncname
     - gosimple
@@ -97,6 +99,7 @@ linters:
     - noctx
     - nolintlint
     - prealloc
+    - revive
     - rowserrcheck
     - structcheck
     - stylecheck
@@ -106,20 +109,11 @@ linters:
     - unused
     - varcheck
     - whitespace
+    - wsl
+    - staticcheck
 
   # don't enable:
-  # - scopelint
-  # - gochecknoglobals
-  # - gocognit
-  # - godox
-  # - interfacer
-  # - maligned
-  # - testpackage
-  # - revive
-  # - wsl
   # - gosec # Not a priority for this repo.
-  # - gocritic # golangci-lint doesn't configure this correctly so we can't disable individual gocritic rules for lines.
-  # - staticcheck # golangci-lint inexplicably drops lint errors, so we need to run it manually.
 
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source

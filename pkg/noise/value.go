@@ -41,6 +41,7 @@ func (v *Value) Linear(x, y float64) float64 {
 		x1--
 		xr++
 	}
+
 	x1 &= intMask
 
 	y1 := int(yi)
@@ -48,6 +49,7 @@ func (v *Value) Linear(x, y float64) float64 {
 		y1--
 		yr++
 	}
+
 	y1 &= intMask
 	y1 <<= shift
 
@@ -66,6 +68,7 @@ func (v *Value) Linear(x, y float64) float64 {
 	// 1) try to eliminate the second use, or
 	// 2) not store the value.
 	xryr := xr * yr
+
 	return xryr*vUpperRight +
 		(yr-xryr)*vUpperLeft +
 		(xr-xryr)*vBottomRight +
@@ -86,6 +89,7 @@ func (v *Value) Cubic(x, y float64) float64 {
 		x1--
 		xr++
 	}
+
 	x1 &= intMask
 
 	y1 := int(yi)
@@ -93,6 +97,7 @@ func (v *Value) Cubic(x, y float64) float64 {
 		y1--
 		yr++
 	}
+
 	y1 = (y1 & intMask) << shift
 
 	// (x0, y0) is the bottom left of the cell south-west of the cell containing (x, y).
