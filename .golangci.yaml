@@ -9,9 +9,6 @@ linters-settings:
       - github.com/sirupsen/logrus: "logging is allowed only by logutils.Log"
   dupl:
     threshold: 100
-  funlen:
-    lines: 100
-    statements: 50
   gci:
     local-prefixes: github.com/golangci/golangci-lint
   goconst:
@@ -24,18 +21,8 @@ linters-settings:
       - opinionated
       - performance
       - style
-    disabled-checks:
-      - dupImport # https://github.com/go-critic/go-critic/issues/845
-      - ifElseChain
-      - octalLiteral
-      - whyNoLint
-      - wrapperFunc
-  gocyclo:
-    min-complexity: 15
   goimports:
     local-prefixes: github.com/golangci/golangci-lint
-  golint:
-    min-confidence: 0
   gomnd:
     settings:
       mnd:
@@ -59,8 +46,6 @@ linters-settings:
   nolintlint:
     allow-leading-space: true # don't require machine-readable nolint directives (i.e. with no leading space)
     allow-unused: false # report any unused nolint directives
-    require-explanation: false # don't require an explanation for nolint directives
-    require-specific: false # don't require nolint directives to be specific about which linter is being skipped
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -116,15 +101,7 @@ linters:
   # - gosec # Not a priority for this repo.
 
 issues:
-  # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
-    - path: _test\.go
+    - path: _test.go
       linters:
-        - gomnd
-
-run:
-  skip-dirs:
-    - test/testdata_etc
-    - internal/cache
-    - internal/renameio
-    - internal/robustio
+        - funlen
